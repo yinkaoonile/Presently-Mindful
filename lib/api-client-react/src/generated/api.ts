@@ -17,14 +17,20 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  CheckOnResponse,
   Checkin,
   CheckinWithReflection,
   CommunityFeedResponse,
+  CommunityReply,
   CreateCheckinRequest,
+  CreateMeditationRequest,
+  CreateReplyRequest,
   GetCommunityFeedParams,
   HealthStatus,
   HugResponse,
   LikeResponse,
+  MeditationSession,
+  MeditationStreakStats,
   QuoteCard,
   StreakStats,
 } from "./api.schemas";
@@ -39,7 +45,6 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const getHealthCheckUrl = () => {
@@ -430,6 +435,243 @@ export function useGetCheckinQuote<
 }
 
 /**
+ * @summary Get meditation sessions for the current user
+ */
+export const getGetMeditationSessionsUrl = () => {
+  return `/api/meditation`;
+};
+
+export const getMeditationSessions = async (
+  options?: RequestInit,
+): Promise<MeditationSession[]> => {
+  return customFetch<MeditationSession[]>(getGetMeditationSessionsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMeditationSessionsQueryKey = () => {
+  return [`/api/meditation`] as const;
+};
+
+export const getGetMeditationSessionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMeditationSessions>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMeditationSessions>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMeditationSessionsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMeditationSessions>>
+  > = ({ signal }) => getMeditationSessions({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMeditationSessions>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMeditationSessionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMeditationSessions>>
+>;
+export type GetMeditationSessionsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get meditation sessions for the current user
+ */
+
+export function useGetMeditationSessions<
+  TData = Awaited<ReturnType<typeof getMeditationSessions>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMeditationSessions>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMeditationSessionsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Log a completed meditation session
+ */
+export const getLogMeditationSessionUrl = () => {
+  return `/api/meditation`;
+};
+
+export const logMeditationSession = async (
+  createMeditationRequest: CreateMeditationRequest,
+  options?: RequestInit,
+): Promise<MeditationSession> => {
+  return customFetch<MeditationSession>(getLogMeditationSessionUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createMeditationRequest),
+  });
+};
+
+export const getLogMeditationSessionMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof logMeditationSession>>,
+    TError,
+    { data: BodyType<CreateMeditationRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof logMeditationSession>>,
+  TError,
+  { data: BodyType<CreateMeditationRequest> },
+  TContext
+> => {
+  const mutationKey = ["logMeditationSession"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof logMeditationSession>>,
+    { data: BodyType<CreateMeditationRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return logMeditationSession(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LogMeditationSessionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof logMeditationSession>>
+>;
+export type LogMeditationSessionMutationBody =
+  BodyType<CreateMeditationRequest>;
+export type LogMeditationSessionMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Log a completed meditation session
+ */
+export const useLogMeditationSession = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof logMeditationSession>>,
+    TError,
+    { data: BodyType<CreateMeditationRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof logMeditationSession>>,
+  TError,
+  { data: BodyType<CreateMeditationRequest> },
+  TContext
+> => {
+  return useMutation(getLogMeditationSessionMutationOptions(options));
+};
+
+/**
+ * @summary Get the meditation streak and stats
+ */
+export const getGetMeditationStreakUrl = () => {
+  return `/api/meditation/streak`;
+};
+
+export const getMeditationStreak = async (
+  options?: RequestInit,
+): Promise<MeditationStreakStats> => {
+  return customFetch<MeditationStreakStats>(getGetMeditationStreakUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMeditationStreakQueryKey = () => {
+  return [`/api/meditation/streak`] as const;
+};
+
+export const getGetMeditationStreakQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMeditationStreak>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMeditationStreak>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMeditationStreakQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMeditationStreak>>
+  > = ({ signal }) => getMeditationStreak({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMeditationStreak>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMeditationStreakQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMeditationStreak>>
+>;
+export type GetMeditationStreakQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get the meditation streak and stats
+ */
+
+export function useGetMeditationStreak<
+  TData = Awaited<ReturnType<typeof getMeditationStreak>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMeditationStreak>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMeditationStreakQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
  * @summary Get the anonymous community feed
  */
 export const getGetCommunityFeedUrl = (params?: GetCommunityFeedParams) => {
@@ -692,4 +934,262 @@ export const useSendLike = <
   TContext
 > => {
   return useMutation(getSendLikeMutationOptions(options));
+};
+
+/**
+ * @summary Check on someone (mark as checked on)
+ */
+export const getCheckOnPostUrl = (id: number) => {
+  return `/api/community/${id}/checkon`;
+};
+
+export const checkOnPost = async (
+  id: number,
+  options?: RequestInit,
+): Promise<CheckOnResponse> => {
+  return customFetch<CheckOnResponse>(getCheckOnPostUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getCheckOnPostMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof checkOnPost>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof checkOnPost>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["checkOnPost"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof checkOnPost>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return checkOnPost(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CheckOnPostMutationResult = NonNullable<
+  Awaited<ReturnType<typeof checkOnPost>>
+>;
+
+export type CheckOnPostMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Check on someone (mark as checked on)
+ */
+export const useCheckOnPost = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof checkOnPost>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof checkOnPost>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getCheckOnPostMutationOptions(options));
+};
+
+/**
+ * @summary Get replies/shared experiences for a community post
+ */
+export const getGetCommunityRepliesUrl = (id: number) => {
+  return `/api/community/${id}/replies`;
+};
+
+export const getCommunityReplies = async (
+  id: number,
+  options?: RequestInit,
+): Promise<CommunityReply[]> => {
+  return customFetch<CommunityReply[]>(getGetCommunityRepliesUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetCommunityRepliesQueryKey = (id: number) => {
+  return [`/api/community/${id}/replies`] as const;
+};
+
+export const getGetCommunityRepliesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCommunityReplies>>,
+  TError = ErrorType<unknown>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCommunityReplies>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCommunityRepliesQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCommunityReplies>>
+  > = ({ signal }) => getCommunityReplies(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCommunityReplies>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCommunityRepliesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCommunityReplies>>
+>;
+export type GetCommunityRepliesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get replies/shared experiences for a community post
+ */
+
+export function useGetCommunityReplies<
+  TData = Awaited<ReturnType<typeof getCommunityReplies>>,
+  TError = ErrorType<unknown>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCommunityReplies>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCommunityRepliesQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Share your experience as a reply to a community post
+ */
+export const getAddCommunityReplyUrl = (id: number) => {
+  return `/api/community/${id}/replies`;
+};
+
+export const addCommunityReply = async (
+  id: number,
+  createReplyRequest: CreateReplyRequest,
+  options?: RequestInit,
+): Promise<CommunityReply> => {
+  return customFetch<CommunityReply>(getAddCommunityReplyUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createReplyRequest),
+  });
+};
+
+export const getAddCommunityReplyMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof addCommunityReply>>,
+    TError,
+    { id: number; data: BodyType<CreateReplyRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof addCommunityReply>>,
+  TError,
+  { id: number; data: BodyType<CreateReplyRequest> },
+  TContext
+> => {
+  const mutationKey = ["addCommunityReply"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof addCommunityReply>>,
+    { id: number; data: BodyType<CreateReplyRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return addCommunityReply(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AddCommunityReplyMutationResult = NonNullable<
+  Awaited<ReturnType<typeof addCommunityReply>>
+>;
+export type AddCommunityReplyMutationBody = BodyType<CreateReplyRequest>;
+export type AddCommunityReplyMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Share your experience as a reply to a community post
+ */
+export const useAddCommunityReply = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof addCommunityReply>>,
+    TError,
+    { id: number; data: BodyType<CreateReplyRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof addCommunityReply>>,
+  TError,
+  { id: number; data: BodyType<CreateReplyRequest> },
+  TContext
+> => {
+  return useMutation(getAddCommunityReplyMutationOptions(options));
 };

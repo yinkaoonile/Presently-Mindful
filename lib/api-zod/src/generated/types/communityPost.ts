@@ -8,7 +8,6 @@
 
 export interface CommunityPost {
   id: number;
-  /** Anonymous snippet of journal entry */
   snippet: string;
   mood: number;
   /** @nullable */
@@ -17,6 +16,8 @@ export interface CommunityPost {
   quoteText?: string | null;
   hugs: number;
   likes: number;
+  checkOns: number;
+  replyCount: number;
   timeAgo: string;
   moodEmoji: string;
 }

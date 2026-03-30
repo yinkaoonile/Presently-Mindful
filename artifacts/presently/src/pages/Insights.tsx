@@ -1,13 +1,16 @@
-import { useGetStreak } from "@workspace/api-client-react";
+import { useGetStreak, useGetMeditationStreak } from "@workspace/api-client-react";
 import { motion } from "framer-motion";
-import { Flame, Lock, Calendar, TrendingUp } from "lucide-react";
+import { Flame, Lock, Calendar, TrendingUp, HeartPulse } from "lucide-react";
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { cn } from "@/lib/utils";
 
 export default function Insights() {
-  const { data: stats, isLoading } = useGetStreak();
+  const { data: stats, isLoading: isStatsLoading } = useGetStreak();
+  const { data: medStats, isLoading: isMedStatsLoading } = useGetMeditationStreak();
 
-  if (isLoading || !stats) {
+  const isLoading = isStatsLoading || isMedStatsLoading;
+
+  if (isLoading || !stats || !medStats) {
     return (
       <div className="flex-1 flex items-center justify-center p-6 min-h-screen">
         <div className="animate-pulse flex flex-col items-center gap-4">
@@ -19,12 +22,12 @@ export default function Insights() {
   }
 
   return (
-    <div className="p-6 pt-12 flex flex-col gap-8">
+    <div className="p-6 pt-12 flex flex-col gap-8 pb-32">
       <div className="text-center">
         <h1 className="text-3xl font-display font-bold text-foreground">Your Journey</h1>
       </div>
 
-      {/* Streak Hero */}
+      {/* Mood Streak Hero */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -52,6 +55,51 @@ export default function Insights() {
             <p className="text-sm text-muted-foreground mb-1">Total</p>
             <p className="font-bold text-lg">{stats.totalCheckins}</p>
           </div>
+        </div>
+      </motion.div>
+
+      {/* Meditation Streak */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="glass-card p-6 rounded-3xl bg-gradient-to-br from-white/80 to-primary/5"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="font-bold text-lg flex items-center gap-2 text-foreground">
+              <HeartPulse className="w-5 h-5 text-primary" />
+              Meditation Practice
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {medStats.totalMinutes} mindful minutes total
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-primary flex items-center justify-end gap-1">
+              <Flame className="w-5 h-5 fill-primary text-primary" />
+              {medStats.currentStreak}
+            </div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Day Streak</p>
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center bg-white/50 rounded-2xl p-4 shadow-inner">
+          {medStats.weeklyActivity.map((day, i) => (
+            <div key={i} className="flex flex-col items-center gap-2">
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                day.didMeditate 
+                  ? "bg-primary text-white shadow-md shadow-primary/20" 
+                  : "bg-white text-muted-foreground border border-border"
+              )}>
+                {day.didMeditate ? "🧘" : ""}
+              </div>
+              <span className="text-[10px] font-medium text-muted-foreground">
+                {day.dayLabel}
+              </span>
+            </div>
+          ))}
         </div>
       </motion.div>
 

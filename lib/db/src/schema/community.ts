@@ -11,6 +11,7 @@ export const communityPostsTable = pgTable("community_posts", {
   quoteText: text("quote_text"),
   hugs: integer("hugs").notNull().default(0),
   likes: integer("likes").notNull().default(0),
+  checkOns: integer("check_ons").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

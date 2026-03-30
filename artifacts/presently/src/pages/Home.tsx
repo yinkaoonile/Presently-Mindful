@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, ArrowRight } from "lucide-react";
 import { useCreateCheckin } from "@workspace/api-client-react";
 import { useCheckinFlow } from "@/context/CheckinContext";
 import { cn } from "@/lib/utils";
@@ -105,7 +105,7 @@ export default function Home() {
         <div className="relative flex-1 min-h-[200px]">
           <textarea
             value={journal}
-            onChange={(e) => setJournal(e.e.target.value)}
+            onChange={(e) => setJournal(e.target.value)}
             placeholder="What's on your mind? (Optional)"
             className="w-full h-full p-6 bg-white/60 backdrop-blur-md rounded-3xl border border-white/80 shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/30 focus:bg-white resize-none transition-all duration-300 text-foreground placeholder:text-muted-foreground/70"
           />
@@ -157,6 +157,26 @@ export default function Home() {
           </>
         )}
       </button>
+
+      {/* Meditation Card */}
+      <motion.button
+        onClick={() => setLocation("/meditate")}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="mt-6 w-full glass-card p-5 rounded-3xl flex items-center justify-between group hover:bg-white/80 transition-all border-border/50 shadow-sm"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+            🧘
+          </div>
+          <div className="text-left">
+            <h3 className="font-bold text-foreground">Take a moment</h3>
+            <p className="text-sm text-muted-foreground">Guided meditation</p>
+          </div>
+        </div>
+        <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors group-hover:translate-x-1" />
+      </motion.button>
     </motion.div>
   );
 }

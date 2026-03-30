@@ -11,7 +11,6 @@ export interface HealthStatus {
 
 export interface Checkin {
   id: number;
-  /** Mood score from 1 to 5 */
   mood: number;
   /** @nullable */
   journal?: string | null;
@@ -61,9 +60,43 @@ export interface StreakStats {
   averageMood: number;
 }
 
+export interface MeditationSession {
+  id: number;
+  /** short (3min), medium (5min), long (10min) */
+  durationType: string;
+  durationSeconds: number;
+  /** breathing, body_scan, visualization, gratitude */
+  meditationType: string;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface CreateMeditationRequest {
+  durationType: string;
+  durationSeconds: number;
+  meditationType: string;
+  /** @nullable */
+  notes?: string | null;
+}
+
+export interface DailyMeditationActivity {
+  date: string;
+  didMeditate: boolean;
+  dayLabel: string;
+  totalMinutes: number;
+}
+
+export interface MeditationStreakStats {
+  currentStreak: number;
+  longestStreak: number;
+  totalSessions: number;
+  totalMinutes: number;
+  weeklyActivity: DailyMeditationActivity[];
+}
+
 export interface CommunityPost {
   id: number;
-  /** Anonymous snippet of journal entry */
   snippet: string;
   mood: number;
   /** @nullable */
@@ -72,6 +105,8 @@ export interface CommunityPost {
   quoteText?: string | null;
   hugs: number;
   likes: number;
+  checkOns: number;
+  replyCount: number;
   timeAgo: string;
   moodEmoji: string;
 }
@@ -82,12 +117,27 @@ export interface CommunityFeedResponse {
   page: number;
 }
 
+export interface CommunityReply {
+  id: number;
+  postId: number;
+  message: string;
+  timeAgo: string;
+}
+
+export interface CreateReplyRequest {
+  message: string;
+}
+
 export interface HugResponse {
   hugs: number;
 }
 
 export interface LikeResponse {
   likes: number;
+}
+
+export interface CheckOnResponse {
+  checkOns: number;
 }
 
 export type GetCommunityFeedParams = {

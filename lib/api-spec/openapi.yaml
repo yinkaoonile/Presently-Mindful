@@ -13,15 +13,14 @@ tags:
     description: Daily mood check-in operations
   - name: community
     description: Anonymous community feed operations
-  - name: ai
-    description: AI reflection operations
+  - name: meditation
+    description: Meditation session operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -96,6 +95,51 @@ paths:
         "404":
           description: Not found
 
+  /meditation:
+    get:
+      operationId: getMeditationSessions
+      tags: [meditation]
+      summary: Get meditation sessions for the current user
+      responses:
+        "200":
+          description: List of meditation sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MeditationSession"
+    post:
+      operationId: logMeditationSession
+      tags: [meditation]
+      summary: Log a completed meditation session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMeditationRequest"
+      responses:
+        "201":
+          description: Logged meditation session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeditationSession"
+
+  /meditation/streak:
+    get:
+      operationId: getMeditationStreak
+      tags: [meditation]
+      summary: Get the meditation streak and stats
+      responses:
+        "200":
+          description: Meditation streak data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeditationStreakStats"
+
   /community:
     get:
       operationId: getCommunityFeed
@@ -158,6 +202,69 @@ paths:
               schema:
                 $ref: "#/components/schemas/LikeResponse"
 
+  /community/{id}/checkon:
+    post:
+      operationId: checkOnPost
+      tags: [community]
+      summary: Check on someone (mark as checked on)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated check-on count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckOnResponse"
+
+  /community/{id}/replies:
+    get:
+      operationId: getCommunityReplies
+      tags: [community]
+      summary: Get replies/shared experiences for a community post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of replies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CommunityReply"
+    post:
+      operationId: addCommunityReply
+      tags: [community]
+      summary: Share your experience as a reply to a community post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReplyRequest"
+      responses:
+        "201":
+          description: Created reply
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityReply"
+
 components:
   schemas:
     HealthStatus:
@@ -175,7 +282,6 @@ components:
           type: integer
         mood:
           type: integer
-          description: Mood score from 1 to 5
         journal:
           type: ["string", "null"]
         aiReflection:
@@ -271,6 +377,86 @@ components:
         - date
         - dayLabel
 
+    MeditationSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        durationType:
+          type: string
+          description: "short (3min), medium (5min), long (10min)"
+        durationSeconds:
+          type: integer
+        meditationType:
+          type: string
+          description: "breathing, body_scan, visualization, gratitude"
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - durationType
+        - durationSeconds
+        - meditationType
+        - createdAt
+
+    CreateMeditationRequest:
+      type: object
+      properties:
+        durationType:
+          type: string
+        durationSeconds:
+          type: integer
+        meditationType:
+          type: string
+        notes:
+          type: ["string", "null"]
+      required:
+        - durationType
+        - durationSeconds
+        - meditationType
+
+    MeditationStreakStats:
+      type: object
+      properties:
+        currentStreak:
+          type: integer
+        longestStreak:
+          type: integer
+        totalSessions:
+          type: integer
+        totalMinutes:
+          type: integer
+        weeklyActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/DailyMeditationActivity"
+      required:
+        - currentStreak
+        - longestStreak
+        - totalSessions
+        - totalMinutes
+        - weeklyActivity
+
+    DailyMeditationActivity:
+      type: object
+      properties:
+        date:
+          type: string
+        didMeditate:
+          type: boolean
+        dayLabel:
+          type: string
+        totalMinutes:
+          type: integer
+      required:
+        - date
+        - didMeditate
+        - dayLabel
+        - totalMinutes
+
     CommunityFeedResponse:
       type: object
       properties:
@@ -294,7 +480,6 @@ components:
           type: integer
         snippet:
           type: string
-          description: Anonymous snippet of journal entry
         mood:
           type: integer
         aiReflection:
@@ -304,6 +489,10 @@ components:
         hugs:
           type: integer
         likes:
+          type: integer
+        checkOns:
+          type: integer
+        replyCount:
           type: integer
         timeAgo:
           type: string
@@ -315,8 +504,35 @@ components:
         - mood
         - hugs
         - likes
+        - checkOns
+        - replyCount
         - timeAgo
         - moodEmoji
+
+    CommunityReply:
+      type: object
+      properties:
+        id:
+          type: integer
+        postId:
+          type: integer
+        message:
+          type: string
+        timeAgo:
+          type: string
+      required:
+        - id
+        - postId
+        - message
+        - timeAgo
+
+    CreateReplyRequest:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
 
     HugResponse:
       type: object
@@ -333,3 +549,11 @@ components:
           type: integer
       required:
         - likes
+
+    CheckOnResponse:
+      type: object
+      properties:
+        checkOns:
+          type: integer
+      required:
+        - checkOns

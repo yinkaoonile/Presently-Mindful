@@ -12,6 +12,7 @@ import Home from "@/pages/Home";
 import Share from "@/pages/Share";
 import Insights from "@/pages/Insights";
 import Community from "@/pages/Community";
+import Meditate from "@/pages/Meditate";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -32,6 +33,7 @@ function Router() {
         <Route path="/share" component={Share} />
         <Route path="/insights" component={Insights} />
         <Route path="/community" component={Community} />
+        <Route path="/meditate" component={Meditate} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

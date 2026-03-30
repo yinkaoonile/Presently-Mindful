@@ -8,7 +8,6 @@
 
 export interface Checkin {
   id: number;
-  /** Mood score from 1 to 5 */
   mood: number;
   /** @nullable */
   journal?: string | null;
