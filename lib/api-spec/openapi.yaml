@@ -8,13 +8,10 @@ servers:
     description: Base API path
 tags:
   - name: health
-    description: Health operations
   - name: checkins
-    description: Daily mood check-in operations
   - name: community
-    description: Anonymous community feed operations
   - name: meditation
-    description: Meditation session operations
+  - name: goals
 paths:
   /healthz:
     get:
@@ -33,7 +30,6 @@ paths:
     get:
       operationId: getCheckins
       tags: [checkins]
-      summary: Get all check-ins for the current session user
       responses:
         "200":
           description: List of check-ins
@@ -46,7 +42,6 @@ paths:
     post:
       operationId: createCheckin
       tags: [checkins]
-      summary: Create a new mood check-in
       requestBody:
         required: true
         content:
@@ -55,7 +50,7 @@ paths:
               $ref: "#/components/schemas/CreateCheckinRequest"
       responses:
         "201":
-          description: Created check-in with AI reflection
+          description: Created
           content:
             application/json:
               schema:
@@ -65,10 +60,9 @@ paths:
     get:
       operationId: getStreak
       tags: [checkins]
-      summary: Get the current streak and mood stats
       responses:
         "200":
-          description: Streak and stats data
+          description: Streak stats
           content:
             application/json:
               schema:
@@ -78,7 +72,6 @@ paths:
     get:
       operationId: getCheckinQuote
       tags: [checkins]
-      summary: Get the shareable quote card for a check-in
       parameters:
         - name: id
           in: path
@@ -87,7 +80,7 @@ paths:
             type: integer
       responses:
         "200":
-          description: Quote card data
+          description: Quote card
           content:
             application/json:
               schema:
@@ -99,10 +92,9 @@ paths:
     get:
       operationId: getMeditationSessions
       tags: [meditation]
-      summary: Get meditation sessions for the current user
       responses:
         "200":
-          description: List of meditation sessions
+          description: List of sessions
           content:
             application/json:
               schema:
@@ -112,7 +104,6 @@ paths:
     post:
       operationId: logMeditationSession
       tags: [meditation]
-      summary: Log a completed meditation session
       requestBody:
         required: true
         content:
@@ -121,7 +112,7 @@ paths:
               $ref: "#/components/schemas/CreateMeditationRequest"
       responses:
         "201":
-          description: Logged meditation session
+          description: Logged session
           content:
             application/json:
               schema:
@@ -131,10 +122,9 @@ paths:
     get:
       operationId: getMeditationStreak
       tags: [meditation]
-      summary: Get the meditation streak and stats
       responses:
         "200":
-          description: Meditation streak data
+          description: Meditation streak
           content:
             application/json:
               schema:
@@ -144,7 +134,6 @@ paths:
     get:
       operationId: getCommunityFeed
       tags: [community]
-      summary: Get the anonymous community feed
       parameters:
         - name: page
           in: query
@@ -168,7 +157,6 @@ paths:
     post:
       operationId: sendHug
       tags: [community]
-      summary: Send a hug to a community post
       parameters:
         - name: id
           in: path
@@ -177,7 +165,7 @@ paths:
             type: integer
       responses:
         "200":
-          description: Updated hug count
+          description: Updated hugs
           content:
             application/json:
               schema:
@@ -187,7 +175,6 @@ paths:
     post:
       operationId: sendLike
       tags: [community]
-      summary: Like a community post
       parameters:
         - name: id
           in: path
@@ -196,7 +183,7 @@ paths:
             type: integer
       responses:
         "200":
-          description: Updated like count
+          description: Updated likes
           content:
             application/json:
               schema:
@@ -206,7 +193,6 @@ paths:
     post:
       operationId: checkOnPost
       tags: [community]
-      summary: Check on someone (mark as checked on)
       parameters:
         - name: id
           in: path
@@ -215,7 +201,7 @@ paths:
             type: integer
       responses:
         "200":
-          description: Updated check-on count
+          description: Updated check-ons
           content:
             application/json:
               schema:
@@ -225,7 +211,6 @@ paths:
     get:
       operationId: getCommunityReplies
       tags: [community]
-      summary: Get replies/shared experiences for a community post
       parameters:
         - name: id
           in: path
@@ -234,7 +219,7 @@ paths:
             type: integer
       responses:
         "200":
-          description: List of replies
+          description: Replies
           content:
             application/json:
               schema:
@@ -244,7 +229,6 @@ paths:
     post:
       operationId: addCommunityReply
       tags: [community]
-      summary: Share your experience as a reply to a community post
       parameters:
         - name: id
           in: path
@@ -265,6 +249,118 @@ paths:
               schema:
                 $ref: "#/components/schemas/CommunityReply"
 
+  /goals:
+    get:
+      operationId: getGoals
+      tags: [goals]
+      summary: Get all goals for the current user
+      responses:
+        "200":
+          description: Goals list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Goal"
+    post:
+      operationId: createGoal
+      tags: [goals]
+      summary: Create a new goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGoalRequest"
+      responses:
+        "201":
+          description: Created goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+
+  /goals/{id}:
+    patch:
+      operationId: updateGoal
+      tags: [goals]
+      summary: Update a goal (complete, rename, toggle public)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGoalRequest"
+      responses:
+        "200":
+          description: Updated goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteGoal
+      tags: [goals]
+      summary: Delete a goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteGoalResponse"
+        "404":
+          description: Not found
+
+  /goals/community:
+    get:
+      operationId: getCommunityGoals
+      tags: [goals]
+      summary: Get public goals from the community for accountability
+      responses:
+        "200":
+          description: Public community goals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CommunityGoal"
+
+  /goals/community/{id}/cheer:
+    post:
+      operationId: cheerGoal
+      tags: [goals]
+      summary: Send a cheer to someone's public goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated cheers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheerResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -272,8 +368,7 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
     Checkin:
       type: object
@@ -293,11 +388,7 @@ components:
         createdAt:
           type: string
           format: date-time
-      required:
-        - id
-        - mood
-        - sharedToCommunity
-        - createdAt
+      required: [id, mood, sharedToCommunity, createdAt]
 
     CreateCheckinRequest:
       type: object
@@ -311,8 +402,7 @@ components:
         shareAnonymously:
           type: boolean
           default: false
-      required:
-        - mood
+      required: [mood]
 
     CheckinWithReflection:
       type: object
@@ -323,10 +413,7 @@ components:
           type: string
         quoteCard:
           $ref: "#/components/schemas/QuoteCard"
-      required:
-        - checkin
-        - reflection
-        - quoteCard
+      required: [checkin, reflection, quoteCard]
 
     QuoteCard:
       type: object
@@ -337,10 +424,7 @@ components:
           type: integer
         date:
           type: string
-      required:
-        - quote
-        - mood
-        - date
+      required: [quote, mood, date]
 
     StreakStats:
       type: object
@@ -357,12 +441,7 @@ components:
             $ref: "#/components/schemas/DailyMood"
         averageMood:
           type: number
-      required:
-        - currentStreak
-        - longestStreak
-        - totalCheckins
-        - weeklyMoods
-        - averageMood
+      required: [currentStreak, longestStreak, totalCheckins, weeklyMoods, averageMood]
 
     DailyMood:
       type: object
@@ -373,9 +452,7 @@ components:
           type: ["integer", "null"]
         dayLabel:
           type: string
-      required:
-        - date
-        - dayLabel
+      required: [date, dayLabel]
 
     MeditationSession:
       type: object
@@ -384,23 +461,16 @@ components:
           type: integer
         durationType:
           type: string
-          description: "short (3min), medium (5min), long (10min)"
         durationSeconds:
           type: integer
         meditationType:
           type: string
-          description: "breathing, body_scan, visualization, gratitude"
         notes:
           type: ["string", "null"]
         createdAt:
           type: string
           format: date-time
-      required:
-        - id
-        - durationType
-        - durationSeconds
-        - meditationType
-        - createdAt
+      required: [id, durationType, durationSeconds, meditationType, createdAt]
 
     CreateMeditationRequest:
       type: object
@@ -413,10 +483,7 @@ components:
           type: string
         notes:
           type: ["string", "null"]
-      required:
-        - durationType
-        - durationSeconds
-        - meditationType
+      required: [durationType, durationSeconds, meditationType]
 
     MeditationStreakStats:
       type: object
@@ -433,12 +500,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DailyMeditationActivity"
-      required:
-        - currentStreak
-        - longestStreak
-        - totalSessions
-        - totalMinutes
-        - weeklyActivity
+      required: [currentStreak, longestStreak, totalSessions, totalMinutes, weeklyActivity]
 
     DailyMeditationActivity:
       type: object
@@ -451,11 +513,7 @@ components:
           type: string
         totalMinutes:
           type: integer
-      required:
-        - date
-        - didMeditate
-        - dayLabel
-        - totalMinutes
+      required: [date, didMeditate, dayLabel, totalMinutes]
 
     CommunityFeedResponse:
       type: object
@@ -468,10 +526,7 @@ components:
           type: integer
         page:
           type: integer
-      required:
-        - posts
-        - total
-        - page
+      required: [posts, total, page]
 
     CommunityPost:
       type: object
@@ -498,16 +553,7 @@ components:
           type: string
         moodEmoji:
           type: string
-      required:
-        - id
-        - snippet
-        - mood
-        - hugs
-        - likes
-        - checkOns
-        - replyCount
-        - timeAgo
-        - moodEmoji
+      required: [id, snippet, mood, hugs, likes, checkOns, replyCount, timeAgo, moodEmoji]
 
     CommunityReply:
       type: object
@@ -520,40 +566,111 @@ components:
           type: string
         timeAgo:
           type: string
-      required:
-        - id
-        - postId
-        - message
-        - timeAgo
+      required: [id, postId, message, timeAgo]
 
     CreateReplyRequest:
       type: object
       properties:
         message:
           type: string
-      required:
-        - message
+      required: [message]
 
     HugResponse:
       type: object
       properties:
         hugs:
           type: integer
-      required:
-        - hugs
+      required: [hugs]
 
     LikeResponse:
       type: object
       properties:
         likes:
           type: integer
-      required:
-        - likes
+      required: [likes]
 
     CheckOnResponse:
       type: object
       properties:
         checkOns:
           type: integer
-      required:
-        - checkOns
+      required: [checkOns]
+
+    Goal:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        type:
+          type: string
+          description: "daily | weekly | monthly | stop"
+        isPublic:
+          type: boolean
+        isCompleted:
+          type: boolean
+        completedAt:
+          type: ["string", "null"]
+        cheers:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, type, isPublic, isCompleted, cheers, createdAt]
+
+    CreateGoalRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        type:
+          type: string
+          description: "daily | weekly | monthly | stop"
+        isPublic:
+          type: boolean
+          default: false
+      required: [title, type]
+
+    UpdateGoalRequest:
+      type: object
+      properties:
+        title:
+          type: ["string", "null"]
+        isCompleted:
+          type: ["boolean", "null"]
+        isPublic:
+          type: ["boolean", "null"]
+
+    DeleteGoalResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required: [success]
+
+    CommunityGoal:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        type:
+          type: string
+        isCompleted:
+          type: boolean
+        cheers:
+          type: integer
+        timeAgo:
+          type: string
+        typeLabel:
+          type: string
+      required: [id, title, type, isCompleted, cheers, timeAgo, typeLabel]
+
+    CheerResponse:
+      type: object
+      properties:
+        cheers:
+          type: integer
+      required: [cheers]

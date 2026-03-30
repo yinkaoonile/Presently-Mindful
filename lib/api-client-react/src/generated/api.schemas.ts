@@ -62,10 +62,8 @@ export interface StreakStats {
 
 export interface MeditationSession {
   id: number;
-  /** short (3min), medium (5min), long (10min) */
   durationType: string;
   durationSeconds: number;
-  /** breathing, body_scan, visualization, gratitude */
   meditationType: string;
   /** @nullable */
   notes?: string | null;
@@ -138,6 +136,53 @@ export interface LikeResponse {
 
 export interface CheckOnResponse {
   checkOns: number;
+}
+
+export interface Goal {
+  id: number;
+  title: string;
+  /** daily | weekly | monthly | stop */
+  type: string;
+  isPublic: boolean;
+  isCompleted: boolean;
+  /** @nullable */
+  completedAt?: string | null;
+  cheers: number;
+  createdAt: string;
+}
+
+export interface CreateGoalRequest {
+  title: string;
+  /** daily | weekly | monthly | stop */
+  type: string;
+  isPublic?: boolean;
+}
+
+export interface UpdateGoalRequest {
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  isCompleted?: boolean | null;
+  /** @nullable */
+  isPublic?: boolean | null;
+}
+
+export interface DeleteGoalResponse {
+  success: boolean;
+}
+
+export interface CommunityGoal {
+  id: number;
+  title: string;
+  type: string;
+  isCompleted: boolean;
+  cheers: number;
+  timeAgo: string;
+  typeLabel: string;
+}
+
+export interface CheerResponse {
+  cheers: number;
 }
 
 export type GetCommunityFeedParams = {

@@ -20,12 +20,17 @@ import type {
   CheckOnResponse,
   Checkin,
   CheckinWithReflection,
+  CheerResponse,
   CommunityFeedResponse,
+  CommunityGoal,
   CommunityReply,
   CreateCheckinRequest,
+  CreateGoalRequest,
   CreateMeditationRequest,
   CreateReplyRequest,
+  DeleteGoalResponse,
   GetCommunityFeedParams,
+  Goal,
   HealthStatus,
   HugResponse,
   LikeResponse,
@@ -33,6 +38,7 @@ import type {
   MeditationStreakStats,
   QuoteCard,
   StreakStats,
+  UpdateGoalRequest,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -119,9 +125,6 @@ export function useHealthCheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Get all check-ins for the current session user
- */
 export const getGetCheckinsUrl = () => {
   return `/api/checkins`;
 };
@@ -170,10 +173,6 @@ export type GetCheckinsQueryResult = NonNullable<
 >;
 export type GetCheckinsQueryError = ErrorType<unknown>;
 
-/**
- * @summary Get all check-ins for the current session user
- */
-
 export function useGetCheckins<
   TData = Awaited<ReturnType<typeof getCheckins>>,
   TError = ErrorType<unknown>,
@@ -194,9 +193,6 @@ export function useGetCheckins<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Create a new mood check-in
- */
 export const getCreateCheckinUrl = () => {
   return `/api/checkins`;
 };
@@ -257,9 +253,6 @@ export type CreateCheckinMutationResult = NonNullable<
 export type CreateCheckinMutationBody = BodyType<CreateCheckinRequest>;
 export type CreateCheckinMutationError = ErrorType<unknown>;
 
-/**
- * @summary Create a new mood check-in
- */
 export const useCreateCheckin = <
   TError = ErrorType<unknown>,
   TContext = unknown,
@@ -280,9 +273,6 @@ export const useCreateCheckin = <
   return useMutation(getCreateCheckinMutationOptions(options));
 };
 
-/**
- * @summary Get the current streak and mood stats
- */
 export const getGetStreakUrl = () => {
   return `/api/checkins/streak`;
 };
@@ -327,10 +317,6 @@ export type GetStreakQueryResult = NonNullable<
 >;
 export type GetStreakQueryError = ErrorType<unknown>;
 
-/**
- * @summary Get the current streak and mood stats
- */
-
 export function useGetStreak<
   TData = Awaited<ReturnType<typeof getStreak>>,
   TError = ErrorType<unknown>,
@@ -347,9 +333,6 @@ export function useGetStreak<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Get the shareable quote card for a check-in
- */
 export const getGetCheckinQuoteUrl = (id: number) => {
   return `/api/checkins/${id}/quote`;
 };
@@ -407,10 +390,6 @@ export type GetCheckinQuoteQueryResult = NonNullable<
 >;
 export type GetCheckinQuoteQueryError = ErrorType<void>;
 
-/**
- * @summary Get the shareable quote card for a check-in
- */
-
 export function useGetCheckinQuote<
   TData = Awaited<ReturnType<typeof getCheckinQuote>>,
   TError = ErrorType<void>,
@@ -434,9 +413,6 @@ export function useGetCheckinQuote<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Get meditation sessions for the current user
- */
 export const getGetMeditationSessionsUrl = () => {
   return `/api/meditation`;
 };
@@ -485,10 +461,6 @@ export type GetMeditationSessionsQueryResult = NonNullable<
 >;
 export type GetMeditationSessionsQueryError = ErrorType<unknown>;
 
-/**
- * @summary Get meditation sessions for the current user
- */
-
 export function useGetMeditationSessions<
   TData = Awaited<ReturnType<typeof getMeditationSessions>>,
   TError = ErrorType<unknown>,
@@ -509,9 +481,6 @@ export function useGetMeditationSessions<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Log a completed meditation session
- */
 export const getLogMeditationSessionUrl = () => {
   return `/api/meditation`;
 };
@@ -573,9 +542,6 @@ export type LogMeditationSessionMutationBody =
   BodyType<CreateMeditationRequest>;
 export type LogMeditationSessionMutationError = ErrorType<unknown>;
 
-/**
- * @summary Log a completed meditation session
- */
 export const useLogMeditationSession = <
   TError = ErrorType<unknown>,
   TContext = unknown,
@@ -596,9 +562,6 @@ export const useLogMeditationSession = <
   return useMutation(getLogMeditationSessionMutationOptions(options));
 };
 
-/**
- * @summary Get the meditation streak and stats
- */
 export const getGetMeditationStreakUrl = () => {
   return `/api/meditation/streak`;
 };
@@ -647,10 +610,6 @@ export type GetMeditationStreakQueryResult = NonNullable<
 >;
 export type GetMeditationStreakQueryError = ErrorType<unknown>;
 
-/**
- * @summary Get the meditation streak and stats
- */
-
 export function useGetMeditationStreak<
   TData = Awaited<ReturnType<typeof getMeditationStreak>>,
   TError = ErrorType<unknown>,
@@ -671,9 +630,6 @@ export function useGetMeditationStreak<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Get the anonymous community feed
- */
 export const getGetCommunityFeedUrl = (params?: GetCommunityFeedParams) => {
   const normalizedParams = new URLSearchParams();
 
@@ -741,10 +697,6 @@ export type GetCommunityFeedQueryResult = NonNullable<
 >;
 export type GetCommunityFeedQueryError = ErrorType<unknown>;
 
-/**
- * @summary Get the anonymous community feed
- */
-
 export function useGetCommunityFeed<
   TData = Awaited<ReturnType<typeof getCommunityFeed>>,
   TError = ErrorType<unknown>,
@@ -768,9 +720,6 @@ export function useGetCommunityFeed<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Send a hug to a community post
- */
 export const getSendHugUrl = (id: number) => {
   return `/api/community/${id}/hug`;
 };
@@ -829,9 +778,6 @@ export type SendHugMutationResult = NonNullable<
 
 export type SendHugMutationError = ErrorType<unknown>;
 
-/**
- * @summary Send a hug to a community post
- */
 export const useSendHug = <
   TError = ErrorType<unknown>,
   TContext = unknown,
@@ -852,9 +798,6 @@ export const useSendHug = <
   return useMutation(getSendHugMutationOptions(options));
 };
 
-/**
- * @summary Like a community post
- */
 export const getSendLikeUrl = (id: number) => {
   return `/api/community/${id}/like`;
 };
@@ -913,9 +856,6 @@ export type SendLikeMutationResult = NonNullable<
 
 export type SendLikeMutationError = ErrorType<unknown>;
 
-/**
- * @summary Like a community post
- */
 export const useSendLike = <
   TError = ErrorType<unknown>,
   TContext = unknown,
@@ -936,9 +876,6 @@ export const useSendLike = <
   return useMutation(getSendLikeMutationOptions(options));
 };
 
-/**
- * @summary Check on someone (mark as checked on)
- */
 export const getCheckOnPostUrl = (id: number) => {
   return `/api/community/${id}/checkon`;
 };
@@ -997,9 +934,6 @@ export type CheckOnPostMutationResult = NonNullable<
 
 export type CheckOnPostMutationError = ErrorType<unknown>;
 
-/**
- * @summary Check on someone (mark as checked on)
- */
 export const useCheckOnPost = <
   TError = ErrorType<unknown>,
   TContext = unknown,
@@ -1020,9 +954,6 @@ export const useCheckOnPost = <
   return useMutation(getCheckOnPostMutationOptions(options));
 };
 
-/**
- * @summary Get replies/shared experiences for a community post
- */
 export const getGetCommunityRepliesUrl = (id: number) => {
   return `/api/community/${id}/replies`;
 };
@@ -1080,10 +1011,6 @@ export type GetCommunityRepliesQueryResult = NonNullable<
 >;
 export type GetCommunityRepliesQueryError = ErrorType<unknown>;
 
-/**
- * @summary Get replies/shared experiences for a community post
- */
-
 export function useGetCommunityReplies<
   TData = Awaited<ReturnType<typeof getCommunityReplies>>,
   TError = ErrorType<unknown>,
@@ -1107,9 +1034,6 @@ export function useGetCommunityReplies<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-/**
- * @summary Share your experience as a reply to a community post
- */
 export const getAddCommunityReplyUrl = (id: number) => {
   return `/api/community/${id}/replies`;
 };
@@ -1171,9 +1095,6 @@ export type AddCommunityReplyMutationResult = NonNullable<
 export type AddCommunityReplyMutationBody = BodyType<CreateReplyRequest>;
 export type AddCommunityReplyMutationError = ErrorType<unknown>;
 
-/**
- * @summary Share your experience as a reply to a community post
- */
 export const useAddCommunityReply = <
   TError = ErrorType<unknown>,
   TContext = unknown,
@@ -1192,4 +1113,485 @@ export const useAddCommunityReply = <
   TContext
 > => {
   return useMutation(getAddCommunityReplyMutationOptions(options));
+};
+
+/**
+ * @summary Get all goals for the current user
+ */
+export const getGetGoalsUrl = () => {
+  return `/api/goals`;
+};
+
+export const getGoals = async (options?: RequestInit): Promise<Goal[]> => {
+  return customFetch<Goal[]>(getGetGoalsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetGoalsQueryKey = () => {
+  return [`/api/goals`] as const;
+};
+
+export const getGetGoalsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getGoals>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getGoals>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetGoalsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getGoals>>> = ({
+    signal,
+  }) => getGoals({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getGoals>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetGoalsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getGoals>>
+>;
+export type GetGoalsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get all goals for the current user
+ */
+
+export function useGetGoals<
+  TData = Awaited<ReturnType<typeof getGoals>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getGoals>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetGoalsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a new goal
+ */
+export const getCreateGoalUrl = () => {
+  return `/api/goals`;
+};
+
+export const createGoal = async (
+  createGoalRequest: CreateGoalRequest,
+  options?: RequestInit,
+): Promise<Goal> => {
+  return customFetch<Goal>(getCreateGoalUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createGoalRequest),
+  });
+};
+
+export const getCreateGoalMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createGoal>>,
+    TError,
+    { data: BodyType<CreateGoalRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createGoal>>,
+  TError,
+  { data: BodyType<CreateGoalRequest> },
+  TContext
+> => {
+  const mutationKey = ["createGoal"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createGoal>>,
+    { data: BodyType<CreateGoalRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createGoal(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateGoalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createGoal>>
+>;
+export type CreateGoalMutationBody = BodyType<CreateGoalRequest>;
+export type CreateGoalMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a new goal
+ */
+export const useCreateGoal = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createGoal>>,
+    TError,
+    { data: BodyType<CreateGoalRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createGoal>>,
+  TError,
+  { data: BodyType<CreateGoalRequest> },
+  TContext
+> => {
+  return useMutation(getCreateGoalMutationOptions(options));
+};
+
+/**
+ * @summary Update a goal (complete, rename, toggle public)
+ */
+export const getUpdateGoalUrl = (id: number) => {
+  return `/api/goals/${id}`;
+};
+
+export const updateGoal = async (
+  id: number,
+  updateGoalRequest: UpdateGoalRequest,
+  options?: RequestInit,
+): Promise<Goal> => {
+  return customFetch<Goal>(getUpdateGoalUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateGoalRequest),
+  });
+};
+
+export const getUpdateGoalMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateGoal>>,
+    TError,
+    { id: number; data: BodyType<UpdateGoalRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateGoal>>,
+  TError,
+  { id: number; data: BodyType<UpdateGoalRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateGoal"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateGoal>>,
+    { id: number; data: BodyType<UpdateGoalRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateGoal(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateGoalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateGoal>>
+>;
+export type UpdateGoalMutationBody = BodyType<UpdateGoalRequest>;
+export type UpdateGoalMutationError = ErrorType<void>;
+
+/**
+ * @summary Update a goal (complete, rename, toggle public)
+ */
+export const useUpdateGoal = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateGoal>>,
+    TError,
+    { id: number; data: BodyType<UpdateGoalRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateGoal>>,
+  TError,
+  { id: number; data: BodyType<UpdateGoalRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateGoalMutationOptions(options));
+};
+
+/**
+ * @summary Delete a goal
+ */
+export const getDeleteGoalUrl = (id: number) => {
+  return `/api/goals/${id}`;
+};
+
+export const deleteGoal = async (
+  id: number,
+  options?: RequestInit,
+): Promise<DeleteGoalResponse> => {
+  return customFetch<DeleteGoalResponse>(getDeleteGoalUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteGoalMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteGoal>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteGoal>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deleteGoal"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteGoal>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteGoal(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteGoalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteGoal>>
+>;
+
+export type DeleteGoalMutationError = ErrorType<void>;
+
+/**
+ * @summary Delete a goal
+ */
+export const useDeleteGoal = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteGoal>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteGoal>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeleteGoalMutationOptions(options));
+};
+
+/**
+ * @summary Get public goals from the community for accountability
+ */
+export const getGetCommunityGoalsUrl = () => {
+  return `/api/goals/community`;
+};
+
+export const getCommunityGoals = async (
+  options?: RequestInit,
+): Promise<CommunityGoal[]> => {
+  return customFetch<CommunityGoal[]>(getGetCommunityGoalsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetCommunityGoalsQueryKey = () => {
+  return [`/api/goals/community`] as const;
+};
+
+export const getGetCommunityGoalsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCommunityGoals>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCommunityGoals>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCommunityGoalsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCommunityGoals>>
+  > = ({ signal }) => getCommunityGoals({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCommunityGoals>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCommunityGoalsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCommunityGoals>>
+>;
+export type GetCommunityGoalsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get public goals from the community for accountability
+ */
+
+export function useGetCommunityGoals<
+  TData = Awaited<ReturnType<typeof getCommunityGoals>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCommunityGoals>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCommunityGoalsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Send a cheer to someone's public goal
+ */
+export const getCheerGoalUrl = (id: number) => {
+  return `/api/goals/community/${id}/cheer`;
+};
+
+export const cheerGoal = async (
+  id: number,
+  options?: RequestInit,
+): Promise<CheerResponse> => {
+  return customFetch<CheerResponse>(getCheerGoalUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getCheerGoalMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof cheerGoal>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof cheerGoal>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["cheerGoal"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof cheerGoal>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return cheerGoal(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CheerGoalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof cheerGoal>>
+>;
+
+export type CheerGoalMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Send a cheer to someone's public goal
+ */
+export const useCheerGoal = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof cheerGoal>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof cheerGoal>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getCheerGoalMutationOptions(options));
 };

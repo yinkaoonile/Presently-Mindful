@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, BarChart2, Heart, Sparkles } from "lucide-react";
+import { Home, BarChart2, Heart, Sparkles, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
@@ -9,6 +9,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/", icon: Home, label: "Check-in" },
     { href: "/insights", icon: BarChart2, label: "Insights" },
+    { href: "/goals", icon: Target, label: "Goals" },
     { href: "/community", icon: Heart, label: "Community" },
   ];
 

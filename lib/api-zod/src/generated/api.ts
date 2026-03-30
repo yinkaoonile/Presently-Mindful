@@ -14,9 +14,6 @@ export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
 
-/**
- * @summary Get all check-ins for the current session user
- */
 export const GetCheckinsResponseItem = zod.object({
   id: zod.number(),
   mood: zod.number(),
@@ -28,9 +25,6 @@ export const GetCheckinsResponseItem = zod.object({
 });
 export const GetCheckinsResponse = zod.array(GetCheckinsResponseItem);
 
-/**
- * @summary Create a new mood check-in
- */
 export const createCheckinBodyMoodMax = 5;
 
 export const createCheckinBodyShareAnonymouslyDefault = false;
@@ -43,9 +37,6 @@ export const CreateCheckinBody = zod.object({
     .default(createCheckinBodyShareAnonymouslyDefault),
 });
 
-/**
- * @summary Get the current streak and mood stats
- */
 export const GetStreakResponse = zod.object({
   currentStreak: zod.number(),
   longestStreak: zod.number(),
@@ -60,9 +51,6 @@ export const GetStreakResponse = zod.object({
   averageMood: zod.number(),
 });
 
-/**
- * @summary Get the shareable quote card for a check-in
- */
 export const GetCheckinQuoteParams = zod.object({
   id: zod.coerce.number(),
 });
@@ -73,18 +61,11 @@ export const GetCheckinQuoteResponse = zod.object({
   date: zod.string(),
 });
 
-/**
- * @summary Get meditation sessions for the current user
- */
 export const GetMeditationSessionsResponseItem = zod.object({
   id: zod.number(),
-  durationType: zod
-    .string()
-    .describe("short (3min), medium (5min), long (10min)"),
+  durationType: zod.string(),
   durationSeconds: zod.number(),
-  meditationType: zod
-    .string()
-    .describe("breathing, body_scan, visualization, gratitude"),
+  meditationType: zod.string(),
   notes: zod.string().nullish(),
   createdAt: zod.coerce.date(),
 });
@@ -92,9 +73,6 @@ export const GetMeditationSessionsResponse = zod.array(
   GetMeditationSessionsResponseItem,
 );
 
-/**
- * @summary Log a completed meditation session
- */
 export const LogMeditationSessionBody = zod.object({
   durationType: zod.string(),
   durationSeconds: zod.number(),
@@ -102,9 +80,6 @@ export const LogMeditationSessionBody = zod.object({
   notes: zod.string().nullish(),
 });
 
-/**
- * @summary Get the meditation streak and stats
- */
 export const GetMeditationStreakResponse = zod.object({
   currentStreak: zod.number(),
   longestStreak: zod.number(),
@@ -120,9 +95,6 @@ export const GetMeditationStreakResponse = zod.object({
   ),
 });
 
-/**
- * @summary Get the anonymous community feed
- */
 export const getCommunityFeedQueryPageDefault = 1;
 export const getCommunityFeedQueryLimitDefault = 20;
 
@@ -151,9 +123,6 @@ export const GetCommunityFeedResponse = zod.object({
   page: zod.number(),
 });
 
-/**
- * @summary Send a hug to a community post
- */
 export const SendHugParams = zod.object({
   id: zod.coerce.number(),
 });
@@ -162,9 +131,6 @@ export const SendHugResponse = zod.object({
   hugs: zod.number(),
 });
 
-/**
- * @summary Like a community post
- */
 export const SendLikeParams = zod.object({
   id: zod.coerce.number(),
 });
@@ -173,9 +139,6 @@ export const SendLikeResponse = zod.object({
   likes: zod.number(),
 });
 
-/**
- * @summary Check on someone (mark as checked on)
- */
 export const CheckOnPostParams = zod.object({
   id: zod.coerce.number(),
 });
@@ -184,9 +147,6 @@ export const CheckOnPostResponse = zod.object({
   checkOns: zod.number(),
 });
 
-/**
- * @summary Get replies/shared experiences for a community post
- */
 export const GetCommunityRepliesParams = zod.object({
   id: zod.coerce.number(),
 });
@@ -201,13 +161,98 @@ export const GetCommunityRepliesResponse = zod.array(
   GetCommunityRepliesResponseItem,
 );
 
-/**
- * @summary Share your experience as a reply to a community post
- */
 export const AddCommunityReplyParams = zod.object({
   id: zod.coerce.number(),
 });
 
 export const AddCommunityReplyBody = zod.object({
   message: zod.string(),
+});
+
+/**
+ * @summary Get all goals for the current user
+ */
+export const GetGoalsResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  type: zod.string().describe("daily | weekly | monthly | stop"),
+  isPublic: zod.boolean(),
+  isCompleted: zod.boolean(),
+  completedAt: zod.string().nullish(),
+  cheers: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+export const GetGoalsResponse = zod.array(GetGoalsResponseItem);
+
+/**
+ * @summary Create a new goal
+ */
+export const createGoalBodyIsPublicDefault = false;
+
+export const CreateGoalBody = zod.object({
+  title: zod.string(),
+  type: zod.string().describe("daily | weekly | monthly | stop"),
+  isPublic: zod.boolean().default(createGoalBodyIsPublicDefault),
+});
+
+/**
+ * @summary Update a goal (complete, rename, toggle public)
+ */
+export const UpdateGoalParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateGoalBody = zod.object({
+  title: zod.string().nullish(),
+  isCompleted: zod.boolean().nullish(),
+  isPublic: zod.boolean().nullish(),
+});
+
+export const UpdateGoalResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  type: zod.string().describe("daily | weekly | monthly | stop"),
+  isPublic: zod.boolean(),
+  isCompleted: zod.boolean(),
+  completedAt: zod.string().nullish(),
+  cheers: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a goal
+ */
+export const DeleteGoalParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DeleteGoalResponse = zod.object({
+  success: zod.boolean(),
+});
+
+/**
+ * @summary Get public goals from the community for accountability
+ */
+export const GetCommunityGoalsResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  type: zod.string(),
+  isCompleted: zod.boolean(),
+  cheers: zod.number(),
+  timeAgo: zod.string(),
+  typeLabel: zod.string(),
+});
+export const GetCommunityGoalsResponse = zod.array(
+  GetCommunityGoalsResponseItem,
+);
+
+/**
+ * @summary Send a cheer to someone's public goal
+ */
+export const CheerGoalParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const CheerGoalResponse = zod.object({
+  cheers: zod.number(),
 });

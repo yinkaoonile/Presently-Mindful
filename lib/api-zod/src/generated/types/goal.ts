@@ -6,12 +6,15 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface MeditationSession {
+export interface Goal {
   id: number;
-  durationType: string;
-  durationSeconds: number;
-  meditationType: string;
+  title: string;
+  /** daily | weekly | monthly | stop */
+  type: string;
+  isPublic: boolean;
+  isCompleted: boolean;
   /** @nullable */
-  notes?: string | null;
+  completedAt?: string | null;
+  cheers: number;
   createdAt: Date;
 }
