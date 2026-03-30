@@ -87,6 +87,12 @@ export default function Meditate() {
     }, {
       onSuccess: () => {
         setLocation("/");
+      },
+      onError: (error: any) => {
+        // Show error but still allow navigation
+        console.log("[v0] Meditation log error:", error);
+        // Still navigate back to home
+        setTimeout(() => setLocation("/"), 500);
       }
     });
   };

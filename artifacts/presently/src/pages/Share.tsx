@@ -32,6 +32,11 @@ export default function Share() {
           src={`${import.meta.env.BASE_URL}images/calm-bg.png`} 
           alt="" 
           className="w-full h-full object-cover"
+          onError={(e) => {
+            // Hide image if it fails to load
+            const el = e.target as HTMLImageElement;
+            el.style.display = 'none';
+          }}
         />
       </div>
 

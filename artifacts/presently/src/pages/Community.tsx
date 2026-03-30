@@ -12,6 +12,40 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Sparkles, MessageCircle, HeartHandshake, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Mock community posts for when API is unavailable
+const MOCK_POSTS = [
+  {
+    id: 1,
+    moodEmoji: "😊",
+    snippet: "Had a great day today! Feeling more positive than usual.",
+    hugs: 12,
+    likes: 8,
+    checkOns: 3,
+    replyCount: 2,
+    timeAgo: "2h ago"
+  },
+  {
+    id: 2,
+    moodEmoji: "😐",
+    snippet: "Work has been challenging, but I'm taking it one step at a time.",
+    hugs: 24,
+    likes: 15,
+    checkOns: 5,
+    replyCount: 4,
+    timeAgo: "4h ago"
+  },
+  {
+    id: 3,
+    moodEmoji: "🙂",
+    snippet: "Tried meditation for the first time and it really helped me relax.",
+    hugs: 18,
+    likes: 22,
+    checkOns: 2,
+    replyCount: 3,
+    timeAgo: "6h ago"
+  }
+];
+
 // Extracted Post Component to handle per-post state (replies)
 function PostCard({ post, localInteractions, onHug, onLike, onCheckOn }: any) {
   const [showReplies, setShowReplies] = useState(false);
@@ -179,7 +213,7 @@ function PostCard({ post, localInteractions, onHug, onLike, onCheckOn }: any) {
 
 export default function Community() {
   const queryClient = useQueryClient();
-  const { data, isLoading } = useGetCommunityFeed({ page: 1, limit: 20 });
+  const { data, isLoading, isError } = useGetCommunityFeed({ page: 1, limit: 20 });
   const sendHug = useSendHug();
   const sendLike = useSendLike();
   const checkOnPost = useCheckOnPost();
@@ -204,6 +238,10 @@ export default function Community() {
     checkOnPost.mutate({ id }, { onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/community"] }) });
   };
 
+  // Use mock data if loading or error
+  const posts = data?.posts || (isLoading || isError ? MOCK_POSTS : []);
+  const displayPosts = isLoading || isError ? MOCK_POSTS : posts;
+
   if (isLoading) {
     return (
       <div className="p-6 pt-12 space-y-6">
@@ -220,11 +258,14 @@ export default function Community() {
       <div className="mb-8">
         <h1 className="text-3xl font-display font-bold text-foreground mb-2">Community</h1>
         <p className="text-muted-foreground">You are not alone. See how others are feeling today anonymously.</p>
+        {isError && (
+          <p className="text-xs text-accent mt-2">Showing sample posts while connecting...</p>
+        )}
       </div>
 
       <div className="flex flex-col gap-6">
         <AnimatePresence>
-          {data?.posts.map((post, i) => (
+          {displayPosts.map((post, i) => (
             <motion.div key={post.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
               <PostCard 
                 post={post} 
@@ -237,7 +278,7 @@ export default function Community() {
           ))}
         </AnimatePresence>
 
-        {data?.posts.length === 0 && (
+        {displayPosts.length === 0 && !isLoading && (
           <div className="text-center py-12 text-muted-foreground">
             <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-20" />
             <p>It's quiet here today.</p>
