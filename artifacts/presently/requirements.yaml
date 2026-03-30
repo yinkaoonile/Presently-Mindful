@@ -1,0 +1,19 @@
+packages:
+  "framer-motion": "For smooth, calming page transitions and interactive micro-animations."
+  "recharts": "For the weekly mood bar chart in the Insights tab."
+  "date-fns": "For formatting dates in the community feed and insights."
+  "clsx": "For conditional class name joining."
+  "tailwind-merge": "For merging tailwind classes safely."
+  "lucide-react": "For beautiful, consistent iconography."
+
+images:
+  - path: "artifacts/presently/public/images/calm-bg.png"
+    description: "A very soft, blurred abstract gradient mesh background in warm cream, gentle peach, and soft lavender. Extremely minimal, airy, and calming."
+    aspect_ratio: "9:16"
+  - path: "artifacts/presently/public/images/pro-bg.png"
+    description: "A subtle, premium abstract gradient in deep warm purple and gold, elegant and soft."
+    aspect_ratio: "16:9"
+
+notes:
+  - Using Wouter for routing.
+  - Data passed between Check-in and Share via React Context to preserve the AI reflection and quote data without needing a new DB fetch immediately.

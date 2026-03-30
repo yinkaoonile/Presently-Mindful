@@ -1,15 +1,20 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Presently mental health app API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: checkins
+    description: Daily mood check-in operations
+  - name: community
+    description: Anonymous community feed operations
+  - name: ai
+    description: AI reflection operations
 paths:
   /healthz:
     get:
@@ -24,6 +29,135 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /checkins:
+    get:
+      operationId: getCheckins
+      tags: [checkins]
+      summary: Get all check-ins for the current session user
+      responses:
+        "200":
+          description: List of check-ins
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Checkin"
+    post:
+      operationId: createCheckin
+      tags: [checkins]
+      summary: Create a new mood check-in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCheckinRequest"
+      responses:
+        "201":
+          description: Created check-in with AI reflection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckinWithReflection"
+
+  /checkins/streak:
+    get:
+      operationId: getStreak
+      tags: [checkins]
+      summary: Get the current streak and mood stats
+      responses:
+        "200":
+          description: Streak and stats data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreakStats"
+
+  /checkins/{id}/quote:
+    get:
+      operationId: getCheckinQuote
+      tags: [checkins]
+      summary: Get the shareable quote card for a check-in
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Quote card data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuoteCard"
+        "404":
+          description: Not found
+
+  /community:
+    get:
+      operationId: getCommunityFeed
+      tags: [community]
+      summary: Get the anonymous community feed
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Community posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityFeedResponse"
+
+  /community/{id}/hug:
+    post:
+      operationId: sendHug
+      tags: [community]
+      summary: Send a hug to a community post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated hug count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HugResponse"
+
+  /community/{id}/like:
+    post:
+      operationId: sendLike
+      tags: [community]
+      summary: Like a community post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated like count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LikeResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +168,168 @@ components:
       required:
         - status
 
+    Checkin:
+      type: object
+      properties:
+        id:
+          type: integer
+        mood:
+          type: integer
+          description: Mood score from 1 to 5
+        journal:
+          type: ["string", "null"]
+        aiReflection:
+          type: ["string", "null"]
+        quoteText:
+          type: ["string", "null"]
+        sharedToCommunity:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - mood
+        - sharedToCommunity
+        - createdAt
+
+    CreateCheckinRequest:
+      type: object
+      properties:
+        mood:
+          type: integer
+          minimum: 1
+          maximum: 5
+        journal:
+          type: ["string", "null"]
+        shareAnonymously:
+          type: boolean
+          default: false
+      required:
+        - mood
+
+    CheckinWithReflection:
+      type: object
+      properties:
+        checkin:
+          $ref: "#/components/schemas/Checkin"
+        reflection:
+          type: string
+        quoteCard:
+          $ref: "#/components/schemas/QuoteCard"
+      required:
+        - checkin
+        - reflection
+        - quoteCard
+
+    QuoteCard:
+      type: object
+      properties:
+        quote:
+          type: string
+        mood:
+          type: integer
+        date:
+          type: string
+      required:
+        - quote
+        - mood
+        - date
+
+    StreakStats:
+      type: object
+      properties:
+        currentStreak:
+          type: integer
+        longestStreak:
+          type: integer
+        totalCheckins:
+          type: integer
+        weeklyMoods:
+          type: array
+          items:
+            $ref: "#/components/schemas/DailyMood"
+        averageMood:
+          type: number
+      required:
+        - currentStreak
+        - longestStreak
+        - totalCheckins
+        - weeklyMoods
+        - averageMood
+
+    DailyMood:
+      type: object
+      properties:
+        date:
+          type: string
+        mood:
+          type: ["integer", "null"]
+        dayLabel:
+          type: string
+      required:
+        - date
+        - dayLabel
+
+    CommunityFeedResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommunityPost"
+        total:
+          type: integer
+        page:
+          type: integer
+      required:
+        - posts
+        - total
+        - page
+
+    CommunityPost:
+      type: object
+      properties:
+        id:
+          type: integer
+        snippet:
+          type: string
+          description: Anonymous snippet of journal entry
+        mood:
+          type: integer
+        aiReflection:
+          type: ["string", "null"]
+        quoteText:
+          type: ["string", "null"]
+        hugs:
+          type: integer
+        likes:
+          type: integer
+        timeAgo:
+          type: string
+        moodEmoji:
+          type: string
+      required:
+        - id
+        - snippet
+        - mood
+        - hugs
+        - likes
+        - timeAgo
+        - moodEmoji
+
+    HugResponse:
+      type: object
+      properties:
+        hugs:
+          type: integer
+      required:
+        - hugs
+
+    LikeResponse:
+      type: object
+      properties:
+        likes:
+          type: integer
+      required:
+        - likes
